@@ -44,8 +44,8 @@ cd $INSTALL_DIR
 
 # 5️⃣ Install npm dependencies
 echo "📦 Installing Node modules..."
-sudo npm install
-sudo npm install cors   # ✅ ensure CORS is available for API
+sudo npm install --legacy-peer-deps
+sudo npm install cors --save   # ✅ ensure CORS is installed
 
 # 6️⃣ Build frontend
 echo "🏗 Building project..."
@@ -65,7 +65,10 @@ then
   sudo npm install -g pm2
 fi
 
-# 9️⃣ Start both frontend and backend
+# 9️⃣ Kill old processes (optional safety)
+sudo pm2 delete all || true
+
+# 🔟 Start both frontend and backend
 echo "🚀 Starting Loopa Server Panel & API..."
 sudo pm2 start "npx serve -s dist -l 3000" --name "loopa-panel"
 sudo pm2 start "node server/index.js" --name "loopa-api"
