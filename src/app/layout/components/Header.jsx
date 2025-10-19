@@ -30,18 +30,22 @@ function Header({ setIsOpen }) {
   const [firewallActive] = useState(true);
 
   // 🔁 تابع گرفتن داده از API
-  const fetchStatus = async () => {
-    try {
-      setRefreshing(true);
-      const res = await fetch("http://localhost:4000/api/status");
-      const data = await res.json();
-      if (data.ok) setStatus(data);
-    } catch (err) {
-      console.error("Failed to fetch status:", err);
-    } finally {
-      setRefreshing(false);
-    }
-  };
+const fetchStatus = async () => {
+  try {
+    setRefreshing(true);
+    const host = window.location.hostname; // ← آدرس هاست فعلی
+    const url = `http://${host}:4000/api/status`; // ← خودکار با پورت 4000
+
+    const res = await fetch(url);
+    const data = await res.json();
+    if (data.ok) setStatus(data);
+  } catch (err) {
+    console.error("Failed to fetch status:", err);
+  } finally {
+    setRefreshing(false);
+  }
+};
+
 
   // ⏱ بروزرسانی هر 10 ثانیه
   useEffect(() => {

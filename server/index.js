@@ -1,14 +1,16 @@
 // server/index.js
 import express from "express";
-import statusRoute from "./routes/status.js"; // مسیر فایل status
+import cors from "cors";               // ✅ اضافه کن
+import statusRoute from "./routes/status.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
 
-// برای خواندن JSON از درخواست‌ها (فعلاً ساده)
+// فعال‌سازی CORS تا فرانت بتونه با API صحبت کنه
+app.use(cors());                       // ✅ خط ضروری برای دسترسی از مرورگر
 app.use(express.json());
 
-// مسیر اصلی API‌ها
+// مسیرهای API
 app.use("/api/status", statusRoute);
 
 // تست پایه

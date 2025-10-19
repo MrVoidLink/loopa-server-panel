@@ -57,17 +57,20 @@ then
   sudo npm install -g serve
 fi
 
-# 8️⃣ Start app with PM2
+# 8️⃣ Install PM2 if needed
 if ! command -v pm2 &> /dev/null
 then
   echo "🚀 Installing PM2..."
   sudo npm install -g pm2
 fi
 
-echo "🚀 Starting Loopa Server Panel..."
-sudo pm2 start "serve -s dist -l 3000" --name loopa-panel
+# 9️⃣ Start both Frontend and Backend
+echo "🚀 Starting Loopa Server Panel & API..."
+sudo pm2 start "npx serve -s dist -l 3000" --name "loopa-panel"
+sudo pm2 start "node server/index.js" --name "loopa-api"
 sudo pm2 save
 sudo pm2 startup | tail -n 3
 
 echo "✅ Installation complete!"
-echo "🌍 Access your panel at: http://$(hostname -I | awk '{print $1}'):3000"
+echo "🌍 Panel:   http://$(hostname -I | awk '{print $1}'):3000"
+echo "🔌 API:     http://$(hostname -I | awk '{print $1}'):4000/api/status"
