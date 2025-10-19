@@ -13,39 +13,57 @@ import {
 
 function Header({ setIsOpen }) {
   const [darkMode, setDarkMode] = useState(true);
-  const [serverIp] = useState("46.249.102.156");
+  const [refreshing, setRefreshing] = useState(false);
+
+  // ✅ داده‌های اصلی
+  const [status, setStatus] = useState({
+    ip: "Loading...",
+    uptime: "Loading...",
+    load: "0",
+  });
+
   const [region] = useState("Frankfurt");
   const [isOnline] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [cpuLoad] = useState(42);
-  const [uptime] = useState("14d 6h");
   const [activeUsers] = useState(127);
   const [activeLicenses] = useState(3);
   const [sslActive] = useState(true);
   const [firewallActive] = useState(true);
 
+  // 🔁 تابع گرفتن داده از API
+  const fetchStatus = async () => {
+    try {
+      setRefreshing(true);
+      const res = await fetch("http://localhost:4000/api/status");
+      const data = await res.json();
+      if (data.ok) setStatus(data);
+    } catch (err) {
+      console.error("Failed to fetch status:", err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  // ⏱ بروزرسانی هر 10 ثانیه
+  useEffect(() => {
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 10000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // 🎨 تم تیره/روشن
   useEffect(() => {
     if (darkMode) document.documentElement.classList.add("dark");
     else document.documentElement.classList.remove("dark");
   }, [darkMode]);
 
-  const handleRefresh = () => {
-    setRefreshing(true);
-    setTimeout(() => setRefreshing(false), 1000);
-  };
-
   return (
-    <header
-      className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 px-4 md:px-8 py-3 
-                 bg-[#0c0e13]/80 backdrop-blur-xl border-b border-white/5 
-                 shadow-[0_0_20px_rgba(0,0,0,0.4)] sticky top-0 z-40"
-    >
+    <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 px-4 md:px-8 py-3 bg-[#0c0e13]/80 backdrop-blur-xl border-b border-white/5 shadow-[0_0_20px_rgba(0,0,0,0.4)] sticky top-0 z-40">
       {/* 🔹 Left: Info Section */}
       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
-        {/* IP + Region */}
+        {/* ✅ IP + Region */}
         <div className="flex items-center gap-2">
           <Globe size={16} className="text-emerald-400" />
-          <span className="text-gray-200 font-medium">{serverIp}</span>
+          <span className="text-gray-200 font-medium">{status.ip}</span>
           <span className="text-gray-500">• {region}</span>
         </div>
 
@@ -63,27 +81,29 @@ function Header({ setIsOpen }) {
           </span>
         </div>
 
-        {/* CPU Load */}
+        {/* ✅ CPU Load */}
         <div className="flex items-center gap-2">
           <Activity size={14} className="text-emerald-400" />
           <span className="text-gray-400">Load:</span>
           <span
             className={`font-semibold ${
-              cpuLoad > 80
+              parseFloat(status.load) > 1
                 ? "text-red-400"
-                : cpuLoad > 60
+                : parseFloat(status.load) > 0.7
                 ? "text-yellow-400"
                 : "text-emerald-400"
             }`}
           >
-            {cpuLoad}%
+            {status.load}
           </span>
         </div>
 
-        {/* Uptime */}
+        {/* ✅ Uptime */}
         <div className="flex items-center gap-2">
           <span className="text-gray-400">Uptime:</span>
-          <span className="text-emerald-400 font-semibold">{uptime}</span>
+          <span className="text-emerald-400 font-semibold">
+            {status.uptime}
+          </span>
         </div>
 
         {/* Users */}
@@ -137,7 +157,7 @@ function Header({ setIsOpen }) {
       <div className="flex items-center justify-end gap-5 text-gray-300">
         {/* Refresh */}
         <button
-          onClick={handleRefresh}
+          onClick={fetchStatus}
           className={`relative p-2 rounded-md hover:bg-white/10 transition-all duration-300 ${
             refreshing
               ? "animate-spin text-emerald-400"
