@@ -12,14 +12,22 @@ sudo apt upgrade -y
 echo "📦 Installing dependencies..."
 sudo apt install -y git curl
 
-# 3️⃣ Install Node.js (v18 LTS)
+# 3️⃣ Install Node.js (v20 LTS)
 if ! command -v node &> /dev/null
 then
-  echo "⚙️ Installing Node.js LTS..."
-  curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+  echo "⚙️ Installing Node.js v20..."
+  curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
   sudo apt install -y nodejs
 else
   echo "✅ Node.js already installed: $(node -v)"
+fi
+
+# 🧩 Ensure version >= 20 (upgrade if needed)
+NODE_MAJOR=$(node -v | sed 's/v\([0-9]*\).*/\1/')
+if [ "$NODE_MAJOR" -lt 20 ]; then
+  echo "⬆️ Upgrading Node.js to v20..."
+  sudo npm install -g n
+  sudo n 20
 fi
 
 # 4️⃣ Clone or update repository
