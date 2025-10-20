@@ -5,10 +5,12 @@ import {
   Menu,
   ChevronLeft,
   ChevronRight,
+  PlusCircle,
 } from "lucide-react";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: <Home size={18} /> },
+  { path: "/create", label: "Create", icon: <PlusCircle size={18} /> },
 ];
 
 function Sidebar({ isOpen, setIsOpen, collapsed, setCollapsed }) {
@@ -82,7 +84,7 @@ function Sidebar({ isOpen, setIsOpen, collapsed, setCollapsed }) {
                   {!collapsed && <span>{item.label}</span>}
                 </Link>
 
-                {/* Tooltip with animation */}
+                {/* Tooltip (collapsed mode) */}
                 {collapsed && (
                   <div
                     className="absolute left-full top-1/2 -translate-y-1/2 ml-2 px-2.5 py-1.5 rounded-md

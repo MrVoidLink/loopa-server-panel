@@ -7,3 +7,7 @@
 @utility animate-fade-in {
   animation: fade-in 0.6s ease-out;
 }
+html, body {
+  overflow: hidden !important;
+  height: 100%;
+}
