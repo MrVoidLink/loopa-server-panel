@@ -24,7 +24,8 @@ router.get("/", (req, res) => {
   const usedMem = (totalMem - freeMem).toFixed(0);
   const usedPercent = ((usedMem / totalMem) * 100).toFixed(1);
 
-  const firewall = run("sudo ufw status | grep -i active") ? "on" : "off";
+  const firewallStatus = run("sudo ufw status | head -n 1 | awk '{print $2}'");
+  const firewall = firewallStatus === "active" ? "on" : "off";
   const ssl = run("test -f /etc/letsencrypt/live/*/fullchain.pem && echo yes") ? "active" : "none";
 
   res.json({

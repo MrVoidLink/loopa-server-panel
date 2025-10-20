@@ -24,12 +24,9 @@ function Header() {
     memoryPercent: "0",
     firewall: "off",
     ssl: "none",
-    activeUsers: 0,
-    activeLicenses: 0,
     region: "Loading...",
   });
 
-  // ✅ گرفتن داده از API
   const fetchStatus = async () => {
     try {
       setRefreshing(true);
@@ -44,21 +41,19 @@ function Header() {
     }
   };
 
-  // ⏱ هر 10 ثانیه آپدیت
   useEffect(() => {
     fetchStatus();
     const interval = setInterval(fetchStatus, 10000);
     return () => clearInterval(interval);
   }, []);
 
-  // 🎨 تم تیره/روشن
   useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
   }, [darkMode]);
 
   return (
     <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 px-4 md:px-8 py-3 bg-[#0c0e13]/80 backdrop-blur-xl border-b border-white/5 shadow-[0_0_20px_rgba(0,0,0,0.4)] sticky top-0 z-40">
-      {/* 🔹 بخش اطلاعات سیستم */}
+      {/* 🔹 اطلاعات سیستم */}
       <div className="flex flex-wrap items-center gap-4 text-sm text-gray-300">
         {/* 🌍 IP + Region */}
         <div className="flex items-center gap-2">
@@ -128,22 +123,6 @@ function Header() {
           <span className="text-emerald-400 font-semibold">{status.uptime}</span>
         </div>
 
-        {/* 👥 Users */}
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400">Users:</span>
-          <span className="text-emerald-400 font-semibold">
-            {status.activeUsers}
-          </span>
-        </div>
-
-        {/* 🪪 Licenses */}
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400">Licenses:</span>
-          <span className="text-emerald-400 font-semibold">
-            {status.activeLicenses}
-          </span>
-        </div>
-
         {/* 🔒 SSL */}
         <div className="flex items-center gap-2">
           {status.ssl === "active" ? (
@@ -177,9 +156,8 @@ function Header() {
         </div>
       </div>
 
-      {/* 🔹 بخش راست: کنترل‌ها */}
+      {/* 🔹 کنترل‌ها */}
       <div className="flex items-center justify-end gap-5 text-gray-300">
-        {/* 🔄 Refresh */}
         <button
           onClick={fetchStatus}
           className={`p-2 rounded-md hover:bg-white/10 transition-all duration-300 ${
@@ -192,7 +170,6 @@ function Header() {
           <RefreshCw size={18} />
         </button>
 
-        {/* 🔔 Notifications */}
         <button
           className="p-2 rounded-md hover:bg-white/10 hover:text-emerald-400 transition"
           title="Notifications"
@@ -200,7 +177,6 @@ function Header() {
           <Bell size={18} />
         </button>
 
-        {/* ☀️🌙 Theme */}
         <button
           onClick={() => setDarkMode(!darkMode)}
           title="Toggle theme"
