@@ -4,12 +4,12 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 
 function AppLayout() {
-  const [isOpen, setIsOpen] = useState(false);       // Mobile toggle
-  const [collapsed, setCollapsed] = useState(false); // Desktop collapse
+  const [isOpen, setIsOpen] = useState(false);       // 🟢 کنترل منوی موبایل
+  const [collapsed, setCollapsed] = useState(false); // 🟢 کنترل حالت جمع‌شده دسکتاپ
 
   return (
     <div
-      className="relative h-screen font-inter overflow-hidden
+      className="relative h-[100dvh] font-inter overflow-hidden
                  bg-[var(--bg-main)] text-[var(--text-main)]
                  transition-colors duration-500"
     >
@@ -24,7 +24,7 @@ function AppLayout() {
 
       {/* ساختار کلی */}
       <div className="relative z-10 flex h-full overflow-hidden">
-        {/* Sidebar */}
+        {/* 🔹 Sidebar */}
         <Sidebar
           isOpen={isOpen}
           setIsOpen={setIsOpen}
@@ -32,15 +32,22 @@ function AppLayout() {
           setCollapsed={setCollapsed}
         />
 
-        {/* Main */}
+        {/* 🔹 بخش اصلی */}
         <div
-          className="flex flex-col flex-1 overflow-hidden min-w-0
+          className={`flex flex-col flex-1 overflow-hidden min-w-0
                      border-l border-[var(--border-color)]
-                     bg-[var(--bg-main)]/80 backdrop-blur-xl transition-all duration-500"
+                     bg-[var(--bg-main)]/80 backdrop-blur-xl
+                     transition-all duration-500`}
         >
+          {/* Header */}
           <Header setIsOpen={setIsOpen} />
 
-          <main className="flex-1 p-6 md:p-10 overflow-y-auto">
+          {/* محتوای صفحه */}
+          <main
+            className="flex-1 overflow-y-auto
+                       p-4 sm:p-6 md:p-8 lg:p-10
+                       scrollbar-thin scrollbar-thumb-[var(--border-color)] scrollbar-track-transparent"
+          >
             <Outlet />
           </main>
         </div>

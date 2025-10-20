@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
+  Menu,
   Bell,
   RefreshCw,
   Sun,
@@ -11,13 +12,15 @@ import {
   ShieldCheck,
   ShieldOff,
   Lock,
+  ChevronDown,
 } from "lucide-react";
 import useTheme from "../hooks/useTheme";
 
-function Header() {
+function Header({ setIsOpen }) {
   const { theme, setTheme } = useTheme();
   const darkMode = theme === "dark";
   const [refreshing, setRefreshing] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
   const [status, setStatus] = useState({
     ip: "Loading...",
     uptime: "Loading...",
@@ -29,6 +32,7 @@ function Header() {
     region: "Loading...",
   });
 
+  // 📡 دریافت وضعیت سرور
   const fetchStatus = async () => {
     try {
       setRefreshing(true);
@@ -50,14 +54,39 @@ function Header() {
   }, []);
 
   return (
-    <header className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-0 px-4 md:px-8 py-3 bg-[var(--bg-main)] backdrop-blur-xl border-b border-[var(--border-color)] shadow-[0_0_20px_rgba(0,0,0,0.4)] sticky top-0 z-40 transition-colors duration-500">
+    <header
+      className="flex flex-col md:flex-row md:items-center md:justify-between
+                 gap-3 md:gap-0 px-4 md:px-8 py-3
+                 bg-[var(--bg-main)] backdrop-blur-xl
+                 border-b border-[var(--border-color)]
+                 shadow-[0_0_20px_rgba(0,0,0,0.4)]
+                 sticky top-0 z-40 transition-colors duration-500"
+    >
+      {/* 🔸 موبایل: دکمه منو و عنوان */}
+      <div className="flex items-center justify-between sm:hidden">
+        <button
+          onClick={() => setIsOpen(true)}
+          className="p-2 rounded-md text-[var(--text-muted)] hover:text-[var(--accent)] transition"
+        >
+          <Menu size={22} />
+        </button>
+
+        <h1 className="font-bold text-lg text-[var(--text-main)]">
+          Loopa<span className="text-[var(--accent)]">Pro</span>
+        </h1>
+      </div>
+
       {/* 🔹 اطلاعات سیستم */}
-      <div className="flex flex-wrap items-center gap-4 text-sm text-[var(--text-main)]">
+      <div className="flex flex-wrap items-center gap-3 text-sm text-[var(--text-main)]">
         {/* 🌍 IP + Region */}
         <div className="flex items-center gap-2">
           <Globe size={16} className="text-emerald-400" />
-          <span className="font-medium">{status.ip}</span>
-          <span className="text-gray-500">• {status.region}</span>
+          <span className="font-medium truncate max-w-[100px] sm:max-w-none">
+            {status.ip}
+          </span>
+          <span className="hidden sm:inline text-gray-500">
+            • {status.region}
+          </span>
         </div>
 
         {/* 🟢 وضعیت */}
@@ -75,7 +104,7 @@ function Header() {
         </div>
 
         {/* 💻 CPU */}
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <Cpu size={14} className="text-emerald-400" />
           <span className="text-gray-400">CPU:</span>
           <span
@@ -91,15 +120,8 @@ function Header() {
           </span>
         </div>
 
-        {/* 📊 Load */}
-        <div className="flex items-center gap-2">
-          <Activity size={14} className="text-emerald-400" />
-          <span className="text-gray-400">Load:</span>
-          <span className="text-emerald-400 font-semibold">{status.load}</span>
-        </div>
-
         {/* 💾 RAM */}
-        <div className="flex items-center gap-2">
+        <div className="hidden sm:flex items-center gap-2">
           <MemoryStick size={14} className="text-emerald-400" />
           <span className="text-gray-400">RAM:</span>
           <span
@@ -111,52 +133,22 @@ function Header() {
                 : "text-emerald-400"
             }`}
           >
-            {status.memoryPercent}% ({status.memoryUsed} / {status.memoryTotal} MB)
+            {status.memoryPercent}%
           </span>
         </div>
 
-        {/* ⏱ Uptime */}
-        <div className="flex items-center gap-2">
-          <span className="text-gray-400">Uptime:</span>
-          <span className="text-emerald-400 font-semibold">{status.uptime}</span>
-        </div>
-
-        {/* 🔒 SSL */}
-        <div className="flex items-center gap-2">
-          <Lock
-            size={14}
-            className={
-              status.ssl === "active" ? "text-emerald-400" : "text-red-500"
-            }
-          />
-          <span
-            className={`font-medium ${
-              status.ssl === "active" ? "text-emerald-400" : "text-red-500"
-            }`}
-          >
-            {status.ssl === "active" ? "SSL Active" : "No SSL"}
-          </span>
-        </div>
-
-        {/* 🧱 Firewall */}
-        <div className="flex items-center gap-2">
-          {status.firewall === "on" ? (
-            <ShieldCheck size={14} className="text-emerald-400" />
-          ) : (
-            <ShieldOff size={14} className="text-red-500" />
-          )}
-          <span
-            className={`font-medium ${
-              status.firewall === "on" ? "text-emerald-400" : "text-red-500"
-            }`}
-          >
-            {status.firewall === "on" ? "Firewall On" : "Firewall Off"}
-          </span>
-        </div>
+        {/* 🔽 جزئیات اضافی برای موبایل */}
+        <button
+          onClick={() => setShowDetails(!showDetails)}
+          className="flex sm:hidden items-center gap-1 text-xs text-emerald-400 border border-emerald-400/30 px-2 py-1 rounded-md active:scale-95 transition"
+        >
+          More <ChevronDown size={12} />
+        </button>
       </div>
 
       {/* 🔹 کنترل‌ها */}
-      <div className="flex items-center justify-end gap-5 text-gray-300">
+      <div className="flex items-center justify-end gap-4 text-gray-300">
+        {/* Refresh */}
         <button
           onClick={fetchStatus}
           className={`p-2 rounded-md hover:bg-white/10 transition-all duration-300 ${
@@ -169,6 +161,7 @@ function Header() {
           <RefreshCw size={18} />
         </button>
 
+        {/* Notifications */}
         <button
           className="p-2 rounded-md hover:bg-white/10 hover:text-emerald-400 transition"
           title="Notifications"
@@ -195,6 +188,39 @@ function Header() {
           </div>
         </button>
       </div>
+
+      {/* 🔸 جزئیات اضافی (موبایل بازشونده) */}
+      {showDetails && (
+        <div className="sm:hidden mt-2 border-t border-[var(--border-color)] pt-2 text-xs text-gray-400 flex flex-wrap gap-3">
+          <div>
+            Uptime:{" "}
+            <span className="text-emerald-400">{status.uptime}</span>
+          </div>
+          <div>
+            Load: <span className="text-emerald-400">{status.load}</span>
+          </div>
+          <div>
+            SSL:{" "}
+            <span
+              className={
+                status.ssl === "active" ? "text-emerald-400" : "text-red-400"
+              }
+            >
+              {status.ssl === "active" ? "Active" : "No SSL"}
+            </span>
+          </div>
+          <div>
+            Firewall:{" "}
+            <span
+              className={
+                status.firewall === "on" ? "text-emerald-400" : "text-red-400"
+              }
+            >
+              {status.firewall === "on" ? "On" : "Off"}
+            </span>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
