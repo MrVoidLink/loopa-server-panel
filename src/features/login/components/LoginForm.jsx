@@ -6,19 +6,24 @@ function LoginForm() {
       <input
         type="email"
         placeholder="Email"
-        className="px-4 py-2 bg-[#111827]/80 border border-gray-700 rounded-lg text-white placeholder-gray-500 
-                   focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none transition-all duration-200"
+        className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg 
+                   text-[var(--text-main)] placeholder-[var(--text-muted)]
+                   focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent 
+                   outline-none transition-all duration-200"
       />
       <input
         type="password"
         placeholder="Password"
-        className="px-4 py-2 bg-[#111827]/80 border border-gray-700 rounded-lg text-white placeholder-gray-500 
-                   focus:ring-2 focus:ring-emerald-400 focus:border-transparent outline-none transition-all duration-200"
+        className="px-4 py-2 bg-[var(--bg-card)] border border-[var(--border-color)] rounded-lg 
+                   text-[var(--text-main)] placeholder-[var(--text-muted)]
+                   focus:ring-2 focus:ring-[var(--accent)] focus:border-transparent 
+                   outline-none transition-all duration-200"
       />
       <button
         type="submit"
-        className="mt-2 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded-lg shadow-md 
-                   shadow-emerald-500/30 hover:shadow-emerald-400/40 transition-all duration-200"
+        className="mt-2 py-2 rounded-lg font-semibold shadow-md transition-all duration-200 
+                   bg-[var(--accent)] hover:bg-[var(--accent-hover)] text-white
+                   shadow-[0_0_15px_var(--accent)]/30 hover:shadow-[0_0_20px_var(--accent-hover)]/40"
       >
         Sign In
       </button>

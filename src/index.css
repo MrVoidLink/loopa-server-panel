@@ -11,3 +11,32 @@ html, body {
   overflow: hidden !important;
   height: 100%;
 }
+@import "tailwindcss";
+
+/* 🌞 Light Theme */
+:root[data-theme="light"] {
+  --bg-main: #f5f7fa;
+  --bg-sidebar: #ffffff;
+  --bg-card: #ffffff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+  --accent: #10b981;
+  --accent-hover: #059669;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}
+
+/* 🌙 Dark Theme */
+:root[data-theme="dark"] {
+  --bg-main: #0d0f14;
+  --bg-sidebar: #0b0c10;
+  --bg-card: rgba(13,15,20,0.8);
+  --text-main: #f9fafb;
+  --text-muted: #9ca3af;
+  --border-color: rgba(255,255,255,0.08);
+  --accent: #10b981;
+  --accent-hover: #34d399;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+}

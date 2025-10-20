@@ -4,15 +4,25 @@ import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 
 function AppLayout() {
-  const [isOpen, setIsOpen] = useState(false);      // Mobile toggle
+  const [isOpen, setIsOpen] = useState(false);       // Mobile toggle
   const [collapsed, setCollapsed] = useState(false); // Desktop collapse
 
   return (
-    <div className="relative h-screen bg-[#0B0C10] text-gray-100 font-inter overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0d1117] via-[#0a0a0f] to-[#0b1a16]" />
+    <div
+      className="relative h-screen font-inter overflow-hidden
+                 bg-[var(--bg-main)] text-[var(--text-main)]
+                 transition-colors duration-500"
+    >
+      {/* 🌀 پس‌زمینه گرادینت نرم */}
+      <div
+        className="absolute inset-0 bg-[linear-gradient(to_bottom_right,
+          var(--bg-main) 0%,
+          var(--bg-card) 40%,
+          var(--bg-main) 100%
+        )]"
+      />
 
-      {/* Layout structure */}
+      {/* ساختار کلی */}
       <div className="relative z-10 flex h-full overflow-hidden">
         {/* Sidebar */}
         <Sidebar
@@ -22,10 +32,15 @@ function AppLayout() {
           setCollapsed={setCollapsed}
         />
 
-        {/* Main section */}
-        <div className="flex flex-col flex-1 overflow-hidden backdrop-blur-xl border-l border-white/5 bg-[#0b0c10]/70 min-w-0">
+        {/* Main */}
+        <div
+          className="flex flex-col flex-1 overflow-hidden min-w-0
+                     border-l border-[var(--border-color)]
+                     bg-[var(--bg-main)]/80 backdrop-blur-xl transition-all duration-500"
+        >
           <Header setIsOpen={setIsOpen} />
-          <main className="flex-1 p-6 md:p-10 overflow-hidden">
+
+          <main className="flex-1 p-6 md:p-10 overflow-y-auto">
             <Outlet />
           </main>
         </div>
