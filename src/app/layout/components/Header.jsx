@@ -62,7 +62,7 @@ function Header({ setIsOpen }) {
                  shadow-[0_0_20px_rgba(0,0,0,0.4)]
                  sticky top-0 z-40 transition-colors duration-500"
     >
-      {/* 🔸 موبایل: دکمه منو و عنوان */}
+      {/* 🔸 موبایل: منو و عنوان */}
       <div className="flex items-center justify-between sm:hidden">
         <button
           onClick={() => setIsOpen(true)}
@@ -84,9 +84,7 @@ function Header({ setIsOpen }) {
           <span className="font-medium truncate max-w-[100px] sm:max-w-none">
             {status.ip}
           </span>
-          <span className="hidden sm:inline text-gray-500">
-            • {status.region}
-          </span>
+          <span className="hidden sm:inline text-gray-500">• {status.region}</span>
         </div>
 
         {/* 🟢 وضعیت */}
@@ -104,7 +102,7 @@ function Header({ setIsOpen }) {
         </div>
 
         {/* 💻 CPU */}
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2">
           <Cpu size={14} className="text-emerald-400" />
           <span className="text-gray-400">CPU:</span>
           <span
@@ -121,7 +119,7 @@ function Header({ setIsOpen }) {
         </div>
 
         {/* 💾 RAM */}
-        <div className="hidden sm:flex items-center gap-2">
+        <div className="hidden md:flex items-center gap-2">
           <MemoryStick size={14} className="text-emerald-400" />
           <span className="text-gray-400">RAM:</span>
           <span
@@ -137,10 +135,48 @@ function Header({ setIsOpen }) {
           </span>
         </div>
 
-        {/* 🔽 جزئیات اضافی برای موبایل */}
+        {/* ⏱ Uptime */}
+        <div className="hidden md:flex items-center gap-2">
+          <Activity size={14} className="text-emerald-400" />
+          <span className="text-gray-400">Uptime:</span>
+          <span className="text-emerald-400 font-semibold">{status.uptime}</span>
+        </div>
+
+        {/* 🔒 SSL */}
+        <div className="hidden md:flex items-center gap-2">
+          <Lock
+            size={14}
+            className={status.ssl === "active" ? "text-emerald-400" : "text-red-500"}
+          />
+          <span
+            className={`font-medium ${
+              status.ssl === "active" ? "text-emerald-400" : "text-red-500"
+            }`}
+          >
+            {status.ssl === "active" ? "SSL Active" : "No SSL"}
+          </span>
+        </div>
+
+        {/* 🧱 Firewall */}
+        <div className="hidden md:flex items-center gap-2">
+          {status.firewall === "on" ? (
+            <ShieldCheck size={14} className="text-emerald-400" />
+          ) : (
+            <ShieldOff size={14} className="text-red-500" />
+          )}
+          <span
+            className={`font-medium ${
+              status.firewall === "on" ? "text-emerald-400" : "text-red-500"
+            }`}
+          >
+            {status.firewall === "on" ? "Firewall On" : "Firewall Off"}
+          </span>
+        </div>
+
+        {/* 🔽 موبایل: More Dropdown */}
         <button
           onClick={() => setShowDetails(!showDetails)}
-          className="flex sm:hidden items-center gap-1 text-xs text-emerald-400 border border-emerald-400/30 px-2 py-1 rounded-md active:scale-95 transition"
+          className="flex md:hidden items-center gap-1 text-xs text-emerald-400 border border-emerald-400/30 px-2 py-1 rounded-md active:scale-95 transition"
         >
           More <ChevronDown size={12} />
         </button>
@@ -152,9 +188,7 @@ function Header({ setIsOpen }) {
         <button
           onClick={fetchStatus}
           className={`p-2 rounded-md hover:bg-white/10 transition-all duration-300 ${
-            refreshing
-              ? "animate-spin text-emerald-400"
-              : "hover:text-emerald-400"
+            refreshing ? "animate-spin text-emerald-400" : "hover:text-emerald-400"
           }`}
           title="Refresh data"
         >
@@ -189,12 +223,17 @@ function Header({ setIsOpen }) {
         </button>
       </div>
 
-      {/* 🔸 جزئیات اضافی (موبایل بازشونده) */}
+      {/* 🔸 فقط موبایل: جزئیات More */}
       {showDetails && (
-        <div className="sm:hidden mt-2 border-t border-[var(--border-color)] pt-2 text-xs text-gray-400 flex flex-wrap gap-3">
+        <div className="md:hidden mt-2 border-t border-[var(--border-color)] pt-2 text-xs text-gray-400 flex flex-wrap gap-3">
           <div>
-            Uptime:{" "}
-            <span className="text-emerald-400">{status.uptime}</span>
+            CPU: <span className="text-emerald-400">{status.cpuUsage}%</span>
+          </div>
+          <div>
+            RAM: <span className="text-emerald-400">{status.memoryPercent}%</span>
+          </div>
+          <div>
+            Uptime: <span className="text-emerald-400">{status.uptime}</span>
           </div>
           <div>
             Load: <span className="text-emerald-400">{status.load}</span>
