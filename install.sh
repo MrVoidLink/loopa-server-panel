@@ -4,22 +4,21 @@ set -e
 echo "🌀 Installing Loopa Server Panel..."
 echo "=================================="
 
+# 0️⃣ Ensure minimal tools before anything else
+echo "🔍 Checking essential tools (curl + git)..."
+if ! command -v curl >/dev/null 2>&1; then
+  echo "➡️ Installing curl..."
+  apt update -y && apt install -y curl
+fi
+if ! command -v git >/dev/null 2>&1; then
+  echo "➡️ Installing git..."
+  apt install -y git
+fi
+
 # 1️⃣ Update system packages
 sudo apt update -y && sudo apt upgrade -y
 
-# 2️⃣ Check & install required base tools
-echo "📦 Checking system dependencies..."
-
-for pkg in git curl; do
-  if ! dpkg -s $pkg >/dev/null 2>&1; then
-    echo "➡️ Installing $pkg..."
-    sudo apt install -y $pkg
-  else
-    echo "✅ $pkg already installed."
-  fi
-done
-
-# 3️⃣ Check Node.js installation (v20+)
+# 2️⃣ Check Node.js (v20+)
 if ! command -v node >/dev/null 2>&1; then
   echo "⚙️ Installing Node.js v20..."
   curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
@@ -35,15 +34,13 @@ else
   fi
 fi
 
-# 4️⃣ Ensure npm is installed
+# 3️⃣ Ensure npm installed
 if ! command -v npm >/dev/null 2>&1; then
   echo "📦 Installing npm..."
   sudo apt install -y npm
-else
-  echo "✅ npm available: $(npm -v)"
 fi
 
-# 5️⃣ Clone or update repository
+# 4️⃣ Clone or update repo
 INSTALL_DIR="/opt/loopa-panel"
 if [ -d "$INSTALL_DIR" ]; then
   echo "🔁 Updating existing installation..."
@@ -52,19 +49,18 @@ else
   echo "⬇️ Cloning Loopa Panel repository..."
   sudo git clone https://github.com/MrVoidLink/loopa-server-panel.git $INSTALL_DIR
 fi
-
 cd $INSTALL_DIR
 
-# 6️⃣ Install project dependencies
+# 5️⃣ Install Node modules
 echo "📦 Installing Node modules..."
 sudo npm install --legacy-peer-deps
 sudo npm install cors --save
 
-# 7️⃣ Build frontend
+# 6️⃣ Build frontend
 echo "🏗 Building project..."
 sudo npm run build
 
-# 8️⃣ Ensure serve & pm2 globally installed
+# 7️⃣ Ensure serve & pm2 globally installed
 for global_pkg in serve pm2; do
   if ! command -v $global_pkg >/dev/null 2>&1; then
     echo "🚀 Installing global package: $global_pkg..."
@@ -74,7 +70,7 @@ for global_pkg in serve pm2; do
   fi
 done
 
-# 9️⃣ Restart services
+# 8️⃣ Start processes
 sudo pm2 delete all || true
 sudo pm2 start "npx serve -s dist -l 3000" --name "loopa-panel"
 sudo pm2 start "node server/index.js" --name "loopa-api"
