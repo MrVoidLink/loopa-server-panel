@@ -1,5 +1,13 @@
 import React, { useState } from "react";
-import { Menu, Bell, Sun, Moon, RefreshCw } from "lucide-react";
+import {
+  Menu,
+  Bell,
+  Sun,
+  Moon,
+  RefreshCw,
+  CheckCircle,
+  XCircle,
+} from "lucide-react";
 import useTheme from "../hooks/useTheme";
 
 function Header({ setIsOpen }) {
@@ -126,11 +134,16 @@ function Header({ setIsOpen }) {
 
       {deployStatus && (
         <div
-          className={`text-xs md:text-sm ${
+          className={`flex items-center gap-2 text-xs md:text-sm ${
             deployStatus.type === "success" ? "text-emerald-400" : "text-red-400"
           }`}
         >
-          {deployStatus.message}
+          {deployStatus.type === "success" ? (
+            <CheckCircle size={18} />
+          ) : (
+            <XCircle size={18} />
+          )}
+          <span>{deployStatus.message}</span>
         </div>
       )}
     </header>
