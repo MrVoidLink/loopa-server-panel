@@ -119,7 +119,7 @@ function Header({ setIsOpen }) {
               setShowAllNotifications(false);
             }}
           >
-            {notifications.length > 0 && (
+            {notifications.length > 0 && !showNotifications && (
               <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-emerald-400 px-1 text-[10px] font-semibold text-black">
                 {notifications.length > 9 ? "9+" : notifications.length}
               </span>
