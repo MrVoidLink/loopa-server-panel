@@ -2,6 +2,7 @@
 import express from "express";
 import cors from "cors";               // ✅ اضافه کن
 import statusRoute from "./routes/status.js";
+import deployRoute from "./routes/deploy.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -12,6 +13,7 @@ app.use(express.json());
 
 // مسیرهای API
 app.use("/api/status", statusRoute);
+app.use("/api/deploy", deployRoute);
 
 // تست پایه
 app.get("/", (req, res) => {

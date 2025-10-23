@@ -1,10 +1,54 @@
-import React from "react";
-import { Menu, Bell, Sun, Moon } from "lucide-react";
+import React, { useState } from "react";
+import { Menu, Bell, Sun, Moon, RefreshCw } from "lucide-react";
 import useTheme from "../hooks/useTheme";
 
 function Header({ setIsOpen }) {
   const { theme, setTheme } = useTheme();
   const darkMode = theme === "dark";
+  const [deploying, setDeploying] = useState(false);
+  const [deployStatus, setDeployStatus] = useState(null);
+
+  const triggerDeploy = async () => {
+    if (deploying) return;
+
+    setDeploying(true);
+    setDeployStatus(null);
+
+    try {
+      const host =
+        typeof window !== "undefined" ? window.location.hostname : "localhost";
+      const response = await fetch(`http://${host}:4000/api/deploy`, {
+        method: "POST",
+      });
+      let data = null;
+
+      try {
+        data = await response.json();
+      } catch {
+        throw new Error("Unable to parse deploy response.");
+      }
+
+      if (!response.ok || !data?.ok) {
+        throw new Error(data?.error || "Update failed.");
+      }
+
+      setDeployStatus({
+        type: "success",
+        message: "Update completed. Reloading the panel...",
+      });
+
+      setTimeout(() => {
+        window.location.reload();
+      }, 1500);
+    } catch (error) {
+      setDeployStatus({
+        type: "error",
+        message: error.message || "Update failed. Check server logs.",
+      });
+    } finally {
+      setDeploying(false);
+    }
+  };
 
   return (
     <header
@@ -39,6 +83,22 @@ function Header({ setIsOpen }) {
 
       <div className="flex items-center justify-end gap-4 text-gray-300">
         <button
+          onClick={triggerDeploy}
+          disabled={deploying}
+          className="flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium
+                     bg-white/10 border border-white/10 text-[var(--text-main)]
+                     hover:bg-white/20 hover:border-white/20 hover:text-emerald-400
+                     transition disabled:opacity-60 disabled:cursor-not-allowed"
+          title="Deploy the latest code to this server"
+        >
+          <RefreshCw
+            size={18}
+            className={deploying ? "animate-spin text-emerald-400" : ""}
+          />
+          <span>{deploying ? "Updating..." : "Pull latest"}</span>
+        </button>
+
+        <button
           className="p-2 rounded-md hover:bg-white/10 hover:text-emerald-400 transition"
           title="Notifications"
         >
@@ -63,6 +123,16 @@ function Header({ setIsOpen }) {
           </div>
         </button>
       </div>
+
+      {deployStatus && (
+        <div
+          className={`text-xs md:text-sm ${
+            deployStatus.type === "success" ? "text-emerald-400" : "text-red-400"
+          }`}
+        >
+          {deployStatus.message}
+        </div>
+      )}
     </header>
   );
 }
