@@ -130,14 +130,19 @@ const generateKeys = async (logs) => {
 
   for (const line of lines) {
     const normalized = line.toLowerCase();
-    if (!privateKey && normalized.includes("private") && normalized.includes("key")) {
-      const match = line.match(/[A-Za-z0-9+/=]{32,}/);
+    if (
+      !privateKey &&
+      normalized.includes("private") &&
+      normalized.includes("key") &&
+      !normalized.includes("password")
+    ) {
+      const match = line.match(/[A-Za-z0-9+/=_-]{32,}/);
       if (match) {
         privateKey = match[0];
       }
     }
     if (!publicKey && normalized.includes("public") && normalized.includes("key")) {
-      const match = line.match(/[A-Za-z0-9+/=]{32,}/);
+      const match = line.match(/[A-Za-z0-9+/=_-]{32,}/);
       if (match) {
         publicKey = match[0];
       }
