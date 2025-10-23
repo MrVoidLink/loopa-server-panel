@@ -54,7 +54,6 @@ cd $INSTALL_DIR
 # 5️⃣ Install Node modules
 echo "📦 Installing Node modules..."
 sudo npm install --legacy-peer-deps
-sudo npm install cors --save
 
 # 6️⃣ Build frontend
 echo "🏗 Building project..."
