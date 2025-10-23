@@ -8,15 +8,23 @@ function AppLayout() {
   const [isOpen, setIsOpen] = useState(false);
   const [collapsed, setCollapsed] = useState(() => {
     if (typeof window === "undefined") return false;
-    return window.localStorage.getItem("loopa.sidebarCollapsed") === "true";
+    try {
+      return window.localStorage.getItem("loopa.sidebarCollapsed") === "true";
+    } catch {
+      return false;
+    }
   });
 
   useEffect(() => {
     if (typeof window === "undefined") return;
-    window.localStorage.setItem(
-      "loopa.sidebarCollapsed",
-      collapsed ? "true" : "false"
-    );
+    try {
+      window.localStorage.setItem(
+        "loopa.sidebarCollapsed",
+        collapsed ? "true" : "false"
+      );
+    } catch {
+      // ignore storage errors
+    }
   }, [collapsed]);
 
   return (

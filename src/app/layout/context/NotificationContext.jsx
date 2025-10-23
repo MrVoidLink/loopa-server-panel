@@ -73,7 +73,11 @@ export function NotificationProvider({ children }) {
   const clearNotifications = useCallback(() => {
     setNotifications([]);
     if (typeof window !== "undefined") {
-      window.localStorage.removeItem(STORAGE_KEY);
+      try {
+        window.localStorage.removeItem(STORAGE_KEY);
+      } catch {
+        // ignore storage errors
+      }
     }
   }, []);
 
