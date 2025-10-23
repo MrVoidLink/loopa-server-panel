@@ -83,8 +83,8 @@ function ConfigPage() {
         )}
 
         {!loading && !error && sortedRecords.length > 0 && (
-          <div className="overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]/80">
-            <div className="hidden md:grid grid-cols-[1.5fr_1fr_1fr_1fr_auto] items-center px-6 py-3 text-xs font-medium uppercase tracking-wide text-[var(--text-muted)] border-b border-[var(--border-color)]">
+          <div className="overflow-hidden rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]/80 shadow-[0_25px_60px_rgba(15,23,42,0.25)]">
+            <div className="hidden md:grid grid-cols-[1.6fr_1.2fr_1.2fr_1fr_auto] items-center px-6 py-4 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)] bg-[var(--bg-main)]/40 border-b border-[var(--border-color)]">
               <span>Tag</span>
               <span>Domain</span>
               <span>SNI</span>
@@ -92,36 +92,71 @@ function ConfigPage() {
               <span></span>
             </div>
 
-            <div className="divide-y divide-[var(--border-color)]">
-              {sortedRecords.map((record) => (
-                <div
-                  key={record.id}
-                  className="flex flex-col gap-3 px-6 py-4 text-sm text-[var(--text-muted)] md:grid md:grid-cols-[1.5fr_1fr_1fr_1fr_auto] md:items-center"
-                >
-                  <div>
-                    <span className="font-semibold text-[var(--text-main)]">
-                      {record.tag}
-                    </span>
-                    <p className="text-xs md:hidden">
-                      Created: {new Date(record.createdAt).toLocaleString()}
-                    </p>
+            <div className="divide-y divide-[var(--border-color)]/60">
+              {sortedRecords.map((record, index) => {
+                const createdLabel = new Date(record.createdAt).toLocaleString();
+                const gradientClass =
+                  index % 2 === 0
+                    ? "bg-gradient-to-r from-[var(--bg-main)]/40 via-transparent to-transparent"
+                    : "bg-gradient-to-r from-transparent via-transparent to-[var(--bg-main)]/30";
+
+                return (
+                  <div
+                    key={record.id}
+                    className={`relative overflow-hidden`}
+                  >
+                    <div
+                      className={`absolute inset-0 opacity-80 ${gradientClass}`}
+                      aria-hidden="true"
+                    />
+                    <div className="relative flex flex-col gap-4 px-6 py-5 text-sm text-[var(--text-muted)] md:grid md:grid-cols-[1.6fr_1.2fr_1.2fr_1fr_auto] md:items-center md:gap-5 hover:bg-[var(--bg-main)]/30 transition-colors">
+                      <div className="space-y-1">
+                        <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] md:hidden">
+                          Tag
+                        </p>
+                        <span className="text-lg font-semibold text-[var(--text-main)]">
+                          {record.tag}
+                        </span>
+                        <p className="text-xs md:hidden">
+                          {createdLabel}
+                        </p>
+                      </div>
+
+                      <div className="space-y-1">
+                        <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] md:hidden">
+                          Domain
+                        </p>
+                        <span className="block truncate text-[var(--text-main)]">
+                          {record.domain}
+                        </span>
+                      </div>
+
+                      <div className="space-y-1 md:space-y-0">
+                        <p className="text-xs uppercase tracking-[0.2em] text-[var(--accent)] md:hidden">
+                          SNI
+                        </p>
+                        <span className="block truncate md:text-left text-[var(--text-main)]">
+                          {record.sni}
+                        </span>
+                      </div>
+
+                      <div className="hidden md:block text-sm">
+                        {createdLabel}
+                      </div>
+
+                      <div className="md:text-right">
+                        <button
+                          type="button"
+                          onClick={() => setSelected(record)}
+                          className="inline-flex items-center justify-center rounded-xl border border-[var(--accent)]/30 bg-[var(--bg-main)]/50 px-4 py-2 text-xs font-semibold text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--accent)]/10 transition"
+                        >
+                          View
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                  <div className="truncate">{record.domain}</div>
-                  <div className="truncate md:block hidden">{record.sni}</div>
-                  <div className="hidden md:block">
-                    {new Date(record.createdAt).toLocaleString()}
-                  </div>
-                  <div className="md:text-right">
-                    <button
-                      type="button"
-                      onClick={() => setSelected(record)}
-                      className="inline-flex items-center justify-center rounded-lg border border-[var(--border-color)] bg-[var(--bg-main)]/40 px-4 py-2 text-xs font-semibold text-[var(--text-main)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition"
-                    >
-                      View
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
