@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import {
   Menu,
   Bell,
@@ -9,12 +9,30 @@ import {
   XCircle,
 } from "lucide-react";
 import useTheme from "../hooks/useTheme";
+import { useNotifications } from "../context/NotificationContext";
 
 function Header({ setIsOpen }) {
   const { theme, setTheme } = useTheme();
   const darkMode = theme === "dark";
   const [deploying, setDeploying] = useState(false);
   const [deployStatus, setDeployStatus] = useState(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showAllNotifications, setShowAllNotifications] = useState(false);
+  const {
+    notifications,
+    addNotification,
+    removeNotification,
+    clearNotifications,
+  } = useNotifications();
+
+  const visibleNotifications = useMemo(() => {
+    if (showAllNotifications) {
+      return notifications;
+    }
+    return notifications.slice(0, 3);
+  }, [notifications, showAllNotifications]);
+
+  const hasMoreNotifications = notifications.length > 3;
 
   const triggerDeploy = async () => {
     if (deploying) return;
@@ -44,6 +62,10 @@ function Header({ setIsOpen }) {
         type: "success",
         message: "Update completed. Reloading the panel...",
       });
+      addNotification({
+        type: "success",
+        message: "Deploy completed successfully.",
+      });
 
       setTimeout(() => {
         window.location.reload();
@@ -52,6 +74,10 @@ function Header({ setIsOpen }) {
       setDeployStatus({
         type: "error",
         message: error.message || "Update failed. Check server logs.",
+      });
+      addNotification({
+        type: "error",
+        message: error.message || "Deploy failed.",
       });
     } finally {
       setDeploying(false);
@@ -106,12 +132,103 @@ function Header({ setIsOpen }) {
           <span>{deploying ? "Updating..." : "Pull latest"}</span>
         </button>
 
-        <button
-          className="p-2 rounded-md hover:bg-white/10 hover:text-emerald-400 transition"
-          title="Notifications"
-        >
-          <Bell size={18} />
-        </button>
+        <div className="relative">
+          <button
+            className="relative p-2 rounded-md hover:bg-white/10 hover:text-emerald-400 transition"
+            title="Notifications"
+            onClick={() => {
+              setShowNotifications((prev) => !prev);
+              setShowAllNotifications(false);
+            }}
+          >
+            {notifications.length > 0 && (
+              <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-emerald-400 px-1 text-[10px] font-semibold text-black">
+                {notifications.length > 9 ? "9+" : notifications.length}
+              </span>
+            )}
+            <Bell size={18} />
+          </button>
+
+          {showNotifications && (
+            <div className="absolute right-0 mt-3 w-80 rounded-2xl border border-[var(--border-color)] bg-[var(--bg-card)]/95 p-4 shadow-[0_20px_45px_rgba(15,23,42,0.35)] backdrop-blur">
+              <div className="mb-3 flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-[var(--text-muted)]">
+                <span>Activity</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearNotifications();
+                    setShowNotifications(false);
+                  }}
+                  className="text-[var(--accent)] hover:text-[var(--accent-hover)] transition"
+                >
+                  Clear
+                </button>
+              </div>
+
+              {notifications.length === 0 && (
+                <p className="text-xs text-[var(--text-muted)]">
+                  No notifications yet.
+                </p>
+              )}
+
+              <ul className="space-y-3">
+                {visibleNotifications.map((item) => (
+                  <li
+                    key={item.id}
+                    className="flex items-start gap-3 rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)]/40 p-3"
+                  >
+                    <span
+                      className={`mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold ${
+                        item.type === "error"
+                          ? "bg-red-500/20 text-red-400"
+                          : item.type === "success"
+                          ? "bg-emerald-500/20 text-emerald-400"
+                          : "bg-cyan-500/20 text-cyan-300"
+                      }`}
+                    >
+                      {item.type === "error"
+                        ? "!"
+                        : item.type === "success"
+                        ? "✓"
+                        : "i"}
+                    </span>
+                    <div className="flex-1">
+                      <p className="text-sm text-[var(--text-main)]">
+                        {item.message}
+                      </p>
+                      <p className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)]">
+                        {new Date(item.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => removeNotification(item.id)}
+                      className="text-[10px] uppercase tracking-[0.2em] text-[var(--text-muted)] hover:text-[var(--text-main)] transition"
+                    >
+                      Close
+                    </button>
+                  </li>
+                ))}
+              </ul>
+
+              {hasMoreNotifications && (
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowAllNotifications((prev) => !prev)
+                  }
+                  className="mt-3 w-full rounded-xl border border-[var(--border-color)] bg-[var(--bg-main)]/40 px-3 py-2 text-xs font-semibold text-[var(--text-muted)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition"
+                >
+                  {showAllNotifications ? "Show less" : "View more"}
+                </button>
+              )}
+            </div>
+          )}
+        </div>
 
         <button
           onClick={() => setTheme(darkMode ? "light" : "dark")}

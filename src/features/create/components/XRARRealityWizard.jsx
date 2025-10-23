@@ -496,7 +496,7 @@ function XRARRealityWizard() {
                   className="w-full px-4 py-3 flex items-center justify-between text-sm font-medium text-[var(--text-main)]"
                 >
                   <span>Server log</span>
-                  <span>{showLogs ? "▲" : "▼"}</span>
+                  <span>{showLogs ? "^" : "v"}</span>
                 </button>
                 {showLogs && (
                   <pre className="max-h-64 overflow-auto px-4 pb-4 text-xs text-[var(--text-muted)] whitespace-pre-wrap">
@@ -566,7 +566,7 @@ function XRARRealityWizard() {
               onClick={resetWizard}
               className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-main)] transition"
             >
-              ✕
+              Close
             </button>
 
             <div className="mb-6 flex items-center gap-3 text-sm font-medium text-[var(--text-muted)]">
@@ -620,3 +620,4 @@ function XRARRealityWizard() {
 }
 
 export default XRARRealityWizard;
+
