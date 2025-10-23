@@ -2,11 +2,26 @@ import React, {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 
 const NotificationContext = createContext(null);
+const STORAGE_KEY = "loopa.notifications";
+
+const readStoredNotifications = () => {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = window.localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.slice(0, 10);
+  } catch {
+    return [];
+  }
+};
 
 const generateId = () => {
   if (typeof globalThis.crypto?.randomUUID === "function") {
@@ -16,7 +31,19 @@ const generateId = () => {
 };
 
 export function NotificationProvider({ children }) {
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState(readStoredNotifications);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    try {
+      window.localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify(notifications.slice(0, 10))
+      );
+    } catch {
+      // ignore storage errors (e.g. private mode)
+    }
+  }, [notifications]);
 
   const addNotification = useCallback(({ message, type = "info" }) => {
     if (!message) return;
@@ -35,6 +62,9 @@ export function NotificationProvider({ children }) {
 
   const clearNotifications = useCallback(() => {
     setNotifications([]);
+    if (typeof window !== "undefined") {
+      window.localStorage.removeItem(STORAGE_KEY);
+    }
   }, []);
 
   const value = useMemo(
