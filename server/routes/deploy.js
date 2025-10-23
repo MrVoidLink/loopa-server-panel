@@ -1,7 +1,8 @@
 import express from "express";
-import { execSync } from "child_process";
+import { exec } from "child_process";
 import path from "path";
 import { fileURLToPath } from "url";
+import { promisify } from "util";
 
 const router = express.Router();
 
@@ -17,35 +18,33 @@ const deployCommands = [
   "pm2 reload loopa-api || pm2 restart loopa-api || true",
 ];
 
-function run(command) {
-  const output = execSync(command, {
-    cwd: PROJECT_ROOT,
-    encoding: "utf8",
-    stdio: "pipe",
-  });
-  return output.trim();
-}
+const execAsync = promisify(exec);
 
-router.post("/", (req, res) => {
+router.post("/", async (req, res) => {
   const logs = [];
 
   try {
-    deployCommands.forEach((command) => {
+    for (const command of deployCommands) {
       logs.push(`$ ${command}`);
-      const result = run(command);
-      if (result) {
-        logs.push(result);
+      const { stdout, stderr } = await execAsync(command, {
+        cwd: PROJECT_ROOT,
+        env: process.env,
+        maxBuffer: 1024 * 1024 * 10,
+      });
+
+      if (stdout?.trim()) {
+        logs.push(stdout.trim());
       }
-    });
+      if (stderr?.trim()) {
+        logs.push(stderr.trim());
+      }
+    }
 
     return res.json({ ok: true, logs });
   } catch (error) {
-    if (error.stdout?.toString()) {
-      logs.push(error.stdout.toString());
-    }
-    if (error.stderr?.toString()) {
-      logs.push(error.stderr.toString());
-    }
+    const { stdout, stderr } = error;
+    if (stdout?.toString().trim()) logs.push(stdout.toString().trim());
+    if (stderr?.toString().trim()) logs.push(stderr.toString().trim());
 
     return res.status(500).json({
       ok: false,
