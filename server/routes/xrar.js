@@ -141,7 +141,16 @@ const generateKeys = async (logs) => {
         privateKey = match[0];
       }
     }
-    if (!publicKey && normalized.includes("public") && normalized.includes("key")) {
+    if (
+      !publicKey &&
+      (normalized.includes("public key") || normalized.includes("publickey"))
+    ) {
+      const match = line.match(/[A-Za-z0-9+/=_-]{32,}/);
+      if (match) {
+        publicKey = match[0];
+      }
+    }
+    if (!publicKey && normalized.includes("password")) {
       const match = line.match(/[A-Za-z0-9+/=_-]{32,}/);
       if (match) {
         publicKey = match[0];
