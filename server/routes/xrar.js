@@ -120,22 +120,43 @@ const generateKeys = async (logs) => {
   logs.push("Generating X25519 keypair via xray x25519...");
   const { stdout } = await execAsync("xray x25519");
 
-  const privateMatch = stdout.match(/(?<=Private key: )[a-zA-Z0-9+/=]+/);
-  const publicMatch =
-    stdout.match(/(?<=Public key: )[a-zA-Z0-9+/=]+/) ||
-    stdout.match(/(?<=PublicKey: )[a-zA-Z0-9+/=]+/);
+  const lines = stdout
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter(Boolean);
 
-  if (!privateMatch) {
-    throw new Error("Unable to parse private key from xray output.");
-  }
-  if (!publicMatch) {
-    throw new Error("Unable to parse public key from xray output.");
+  let privateKey = null;
+  let publicKey = null;
+
+  for (const line of lines) {
+    const normalized = line.toLowerCase();
+    if (!privateKey && normalized.includes("private") && normalized.includes("key")) {
+      const match = line.match(/[A-Za-z0-9+/=]{32,}/);
+      if (match) {
+        privateKey = match[0];
+      }
+    }
+    if (!publicKey && normalized.includes("public") && normalized.includes("key")) {
+      const match = line.match(/[A-Za-z0-9+/=]{32,}/);
+      if (match) {
+        publicKey = match[0];
+      }
+    }
   }
 
-  return {
-    privateKey: privateMatch[0],
-    publicKey: publicMatch[0],
-  };
+  if (!privateKey) {
+    throw new Error(
+      `Unable to parse private key from xray output: ${stdout.trim()}`
+    );
+  }
+
+  if (!publicKey) {
+    throw new Error(
+      `Unable to parse public key from xray output: ${stdout.trim()}`
+    );
+  }
+
+  return { privateKey, publicKey };
 };
 
 router.post("/reality", async (req, res) => {
