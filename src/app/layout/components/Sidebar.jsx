@@ -1,9 +1,10 @@
 import React from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Home, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { Home, PlusCircle, ChevronLeft, ChevronRight, X } from "lucide-react";
 
 const navItems = [
   { path: "/", label: "Dashboard", icon: <Home size={18} /> },
+  { path: "/create", label: "Create", icon: <PlusCircle size={18} /> },
 ];
 
 function Sidebar({ isOpen, setIsOpen, collapsed, setCollapsed }) {
