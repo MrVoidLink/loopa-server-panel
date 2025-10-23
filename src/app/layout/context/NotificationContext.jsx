@@ -17,7 +17,16 @@ const readStoredNotifications = () => {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.slice(0, 10);
+    return parsed
+      .filter((item) => item && typeof item === "object")
+      .map((item) => ({
+        id: item.id || Math.random().toString(36).slice(2),
+        message: item.message,
+        type: item.type || "info",
+        timestamp: item.timestamp || new Date().toISOString(),
+        read: Boolean(item.read),
+      }))
+      .slice(0, 10);
   } catch {
     return [];
   }
@@ -52,6 +61,7 @@ export function NotificationProvider({ children }) {
       message,
       type,
       timestamp: new Date().toISOString(),
+      read: false,
     };
     setNotifications((prev) => [entry, ...prev].slice(0, 10));
   }, []);
@@ -67,14 +77,50 @@ export function NotificationProvider({ children }) {
     }
   }, []);
 
+  const markAllRead = useCallback(() => {
+    setNotifications((prev) => {
+      let changed = false;
+      const next = prev.map((item) => {
+        if (item.read) return item;
+        changed = true;
+        return { ...item, read: true };
+      });
+      return changed ? next : prev;
+    });
+  }, []);
+
+  const markAsRead = useCallback((id) => {
+    setNotifications((prev) =>
+      prev.map((item) =>
+        item.id === id ? { ...item, read: true } : item
+      )
+    );
+  }, []);
+
+  const unreadCount = useMemo(
+    () => notifications.filter((item) => !item.read).length,
+    [notifications]
+  );
+
   const value = useMemo(
     () => ({
       notifications,
       addNotification,
       removeNotification,
       clearNotifications,
+      markAllRead,
+      markAsRead,
+      unreadCount,
     }),
-    [notifications, addNotification, removeNotification, clearNotifications]
+    [
+      notifications,
+      addNotification,
+      removeNotification,
+      clearNotifications,
+      markAllRead,
+      markAsRead,
+      unreadCount,
+    ]
   );
 
   return (

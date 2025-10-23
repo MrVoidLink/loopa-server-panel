@@ -14,6 +14,8 @@ function Header({ setIsOpen }) {
     addNotification,
     removeNotification,
     clearNotifications,
+    markAllRead,
+    unreadCount,
   } = useNotifications();
 
   const visibleNotifications = useMemo(() => {
@@ -115,13 +117,19 @@ function Header({ setIsOpen }) {
             className="relative p-2 rounded-md hover:bg-white/10 hover:text-emerald-400 transition"
             title="Notifications"
             onClick={() => {
-              setShowNotifications((prev) => !prev);
+              setShowNotifications((prev) => {
+                const next = !prev;
+                if (!prev) {
+                  markAllRead();
+                }
+                return next;
+              });
               setShowAllNotifications(false);
             }}
           >
-            {notifications.length > 0 && !showNotifications && (
+            {unreadCount > 0 && !showNotifications && (
               <span className="absolute -top-1 -right-1 inline-flex h-4 min-w-[16px] items-center justify-center rounded-full bg-emerald-400 px-1 text-[10px] font-semibold text-black">
-                {notifications.length > 9 ? "9+" : notifications.length}
+                {unreadCount > 9 ? "9+" : unreadCount}
               </span>
             )}
             <Bell size={18} />
