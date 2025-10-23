@@ -139,6 +139,12 @@ const appendRecord = async (record) => {
   await fs.writeFile(RECORDS_PATH, JSON.stringify(records, null, 2));
 };
 
+const writeRecords = async (records) => {
+  const dir = path.dirname(RECORDS_PATH);
+  await fs.mkdir(dir, { recursive: true });
+  await fs.writeFile(RECORDS_PATH, JSON.stringify(records, null, 2));
+};
+
 const generateKeys = async (logs) => {
   logs.push("Generating X25519 keypair via xray x25519...");
   const { stdout } = await execAsync("xray x25519");
@@ -352,6 +358,93 @@ router.get("/records", async (req, res) => {
     return res.status(500).json({
       ok: false,
       error: error.message,
+    });
+  }
+});
+
+router.delete("/records/:id", async (req, res) => {
+  const { id } = req.params;
+  const logs = [];
+
+  try {
+    const records = await readRecords();
+    const index = records.findIndex((record) => record.id === id);
+    if (index === -1) {
+      return res.status(404).json({ ok: false, error: "Record not found." });
+    }
+
+    const record = records[index];
+    logs.push(`Deleting record ${record.tag} (${record.id})`);
+
+    const config = await ensureConfig(logs);
+    const initialInbounds = config.inbounds.length;
+
+    config.inbounds = config.inbounds.filter((inbound) => {
+      const matchesTag = inbound.tag === record.tag;
+      const matchesClient =
+        inbound?.settings?.clients?.some((client) => client.id === record.uuid) ||
+        false;
+      return !(matchesTag || matchesClient);
+    });
+
+    const removed = initialInbounds - config.inbounds.length;
+    if (removed > 0) {
+      logs.push(`Removed ${removed} inbound(s) from config.json.`);
+      await fs.writeFile(CONFIG_PATH, JSON.stringify(config, null, 2), {
+        mode: 0o644,
+      });
+    } else {
+      logs.push("No matching inbound found in config.json.");
+    }
+
+    if (record.privateKeyPath) {
+      try {
+        await fs.unlink(record.privateKeyPath);
+        logs.push(`Deleted private key file: ${record.privateKeyPath}`);
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          logs.push(
+            `Failed to delete private key file (${record.privateKeyPath}): ${error.message}`
+          );
+        } else {
+          logs.push(
+            `Private key file already removed: ${record.privateKeyPath}`
+          );
+        }
+      }
+    }
+
+    if (record.summaryFile) {
+      try {
+        await fs.unlink(record.summaryFile);
+        logs.push(`Deleted summary file: ${record.summaryFile}`);
+      } catch (error) {
+        if (error.code !== "ENOENT") {
+          logs.push(
+            `Failed to delete summary file (${record.summaryFile}): ${error.message}`
+          );
+        } else {
+          logs.push(`Summary file already removed: ${record.summaryFile}`);
+        }
+      }
+    }
+
+    records.splice(index, 1);
+    await writeRecords(records);
+    logs.push("Record removed from reality-records.json.");
+
+    if (removed > 0) {
+      await execAsync(`systemctl restart ${XRAY_SERVICE}`);
+      logs.push("Xray service restarted.");
+    }
+
+    return res.json({ ok: true, logs });
+  } catch (error) {
+    logs.push(error.message);
+    return res.status(500).json({
+      ok: false,
+      error: error.message,
+      logs,
     });
   }
 });
