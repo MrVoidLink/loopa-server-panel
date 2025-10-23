@@ -559,8 +559,8 @@ function XRARRealityWizard() {
       </div>
 
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur">
-          <div className="relative w-full max-w-3xl mx-4 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)]/95 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.45)]">
+        <div className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/60 backdrop-blur py-8">
+          <div className="relative w-full max-w-3xl mx-4 rounded-3xl border border-[var(--border-color)] bg-[var(--bg-card)]/95 p-8 shadow-[0_30px_80px_rgba(15,23,42,0.45)] max-h-[90vh] overflow-y-auto">
             <button
               type="button"
               onClick={resetWizard}
