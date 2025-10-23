@@ -3,6 +3,7 @@ import express from "express";
 import cors from "cors";               // ✅ اضافه کن
 import statusRoute from "./routes/status.js";
 import deployRoute from "./routes/deploy.js";
+import xrarRoute from "./routes/xrar.js";
 
 const app = express();
 const PORT = process.env.PORT || 4000;
@@ -14,6 +15,7 @@ app.use(express.json());
 // مسیرهای API
 app.use("/api/status", statusRoute);
 app.use("/api/deploy", deployRoute);
+app.use("/api/xrar", xrarRoute);
 
 // تست پایه
 app.get("/", (req, res) => {
