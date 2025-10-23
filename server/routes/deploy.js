@@ -10,12 +10,10 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const PROJECT_ROOT = path.resolve(__dirname, "..", "..");
 
-const deployCommands = [
+const buildCommands = [
   "git pull",
   "npm install --legacy-peer-deps",
   "npm run build",
-  "pm2 reload loopa-panel || pm2 restart loopa-panel || true",
-  "pm2 reload loopa-api || pm2 restart loopa-api || true",
 ];
 
 const execAsync = promisify(exec);
@@ -24,7 +22,7 @@ router.post("/", async (req, res) => {
   const logs = [];
 
   try {
-    for (const command of deployCommands) {
+    for (const command of buildCommands) {
       logs.push(`$ ${command}`);
       const { stdout, stderr } = await execAsync(command, {
         cwd: PROJECT_ROOT,
@@ -40,7 +38,23 @@ router.post("/", async (req, res) => {
       }
     }
 
-    return res.json({ ok: true, logs });
+    logs.push("Scheduling process reload...");
+    res.json({ ok: true, logs });
+
+    setImmediate(async () => {
+      try {
+        await execAsync(
+          "pm2 reload loopa-panel || pm2 restart loopa-panel || true",
+          { cwd: PROJECT_ROOT, env: process.env }
+        );
+        await execAsync(
+          "pm2 reload loopa-api || pm2 restart loopa-api || true",
+          { cwd: PROJECT_ROOT, env: process.env }
+        );
+      } catch (reloadError) {
+        console.error("Failed to reload processes:", reloadError);
+      }
+    });
   } catch (error) {
     const { stdout, stderr } = error;
     if (stdout?.toString().trim()) logs.push(stdout.toString().trim());
