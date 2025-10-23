@@ -1,13 +1,5 @@
 import React, { useMemo, useState } from "react";
-import {
-  Menu,
-  Bell,
-  Sun,
-  Moon,
-  RefreshCw,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { Menu, Bell, Sun, Moon, RefreshCw } from "lucide-react";
 import useTheme from "../hooks/useTheme";
 import { useNotifications } from "../context/NotificationContext";
 
@@ -15,7 +7,6 @@ function Header({ setIsOpen }) {
   const { theme, setTheme } = useTheme();
   const darkMode = theme === "dark";
   const [deploying, setDeploying] = useState(false);
-  const [deployStatus, setDeployStatus] = useState(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAllNotifications, setShowAllNotifications] = useState(false);
   const {
@@ -38,7 +29,6 @@ function Header({ setIsOpen }) {
     if (deploying) return;
 
     setDeploying(true);
-    setDeployStatus(null);
 
     try {
       const host =
@@ -58,23 +48,11 @@ function Header({ setIsOpen }) {
         throw new Error(data?.error || "Update failed.");
       }
 
-      setDeployStatus({
-        type: "success",
-        message: "Update completed. Reloading the panel...",
-      });
       addNotification({
         type: "success",
         message: "Deploy completed successfully.",
       });
-
-      setTimeout(() => {
-        window.location.reload();
-      }, 1500);
     } catch (error) {
-      setDeployStatus({
-        type: "error",
-        message: error.message || "Update failed. Check server logs.",
-      });
       addNotification({
         type: "error",
         message: error.message || "Deploy failed.",
@@ -248,21 +226,6 @@ function Header({ setIsOpen }) {
           </div>
         </button>
       </div>
-
-      {deployStatus && (
-        <div
-          className={`flex items-center gap-2 text-xs md:text-sm ${
-            deployStatus.type === "success" ? "text-emerald-400" : "text-red-400"
-          }`}
-        >
-          {deployStatus.type === "success" ? (
-            <CheckCircle size={18} />
-          ) : (
-            <XCircle size={18} />
-          )}
-          <span>{deployStatus.message}</span>
-        </div>
-      )}
     </header>
   );
 }
