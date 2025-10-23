@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
@@ -6,7 +6,18 @@ import { NotificationProvider } from "./context/NotificationContext";
 
 function AppLayout() {
   const [isOpen, setIsOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.localStorage.getItem("loopa.sidebarCollapsed") === "true";
+  });
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(
+      "loopa.sidebarCollapsed",
+      collapsed ? "true" : "false"
+    );
+  }, [collapsed]);
 
   return (
     <NotificationProvider>
