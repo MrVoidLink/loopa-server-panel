@@ -11,6 +11,7 @@ const router = express.Router();
 const execAsync = promisify(execCallback);
 
 const CONFIG_PATH = "/usr/local/etc/xray/config.json";
+const RECORDS_PATH = "/usr/local/etc/xray/reality-records.json";
 const XRAY_SERVICE = "xray";
 const REQUIRED_COMMANDS = ["jq", "qrencode", "openssl", "curl"];
 
@@ -114,6 +115,28 @@ const ensureConfig = async (logs) => {
   }
 
   return parsed;
+};
+
+const readRecords = async () => {
+  try {
+    const raw = await fs.readFile(RECORDS_PATH, "utf8");
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    if (error.code === "ENOENT") {
+      return [];
+    }
+    throw error;
+  }
+};
+
+const appendRecord = async (record) => {
+  const dir = path.dirname(RECORDS_PATH);
+  await fs.mkdir(dir, { recursive: true });
+
+  const records = await readRecords();
+  records.push(record);
+  await fs.writeFile(RECORDS_PATH, JSON.stringify(records, null, 2));
 };
 
 const generateKeys = async (logs) => {
@@ -285,21 +308,27 @@ router.post("/reality", async (req, res) => {
     await fs.writeFile(summaryPath, summaryContent);
     logs.push(`Summary saved to ${summaryPath}`);
 
+    const record = {
+      id: crypto.randomUUID(),
+      createdAt: new Date().toISOString(),
+      port: sanitizedPort,
+      domain: sanitizedDomain,
+      sni: sanitizedSni,
+      tag: sanitizedTag,
+      uuid,
+      shortId,
+      publicKey,
+      privateKeyPath,
+      summaryFile: summaryPath,
+      realityLink: encodedLink,
+      configPath: CONFIG_PATH,
+    };
+    await appendRecord(record);
+    logs.push("Record appended to reality-records.json.");
+
     return res.json({
       ok: true,
-      data: {
-        port: sanitizedPort,
-        domain: sanitizedDomain,
-        sni: sanitizedSni,
-        tag: sanitizedTag,
-        uuid,
-        shortId,
-        publicKey,
-        privateKeyPath,
-        summaryFile: summaryPath,
-        realityLink: encodedLink,
-        configPath: CONFIG_PATH,
-      },
+      data: record,
       logs,
     });
   } catch (error) {
@@ -308,6 +337,21 @@ router.post("/reality", async (req, res) => {
       ok: false,
       error: error.message,
       logs,
+    });
+  }
+});
+
+router.get("/records", async (req, res) => {
+  try {
+    const records = await readRecords();
+    records.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    );
+    return res.json({ ok: true, data: records });
+  } catch (error) {
+    return res.status(500).json({
+      ok: false,
+      error: error.message,
     });
   }
 });
