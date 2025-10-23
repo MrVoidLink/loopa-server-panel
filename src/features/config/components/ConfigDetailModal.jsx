@@ -10,9 +10,9 @@ function ConfigDetailModal({ record, onClose }) {
         <button
           type="button"
           onClick={onClose}
-          className="absolute top-4 right-4 text-[var(--text-muted)] hover:text-[var(--text-main)] transition"
+          className="absolute top-4 right-4 text-sm font-semibold text-[var(--text-muted)] hover:text-[var(--text-main)] transition"
         >
-          ✕
+          Close
         </button>
 
         <div className="space-y-6">
@@ -21,7 +21,7 @@ function ConfigDetailModal({ record, onClose }) {
               {record.tag}
             </h2>
             <p className="text-sm text-[var(--text-muted)]">
-              ایجاد در {new Date(record.createdAt).toLocaleString()}
+              Created at {new Date(record.createdAt).toLocaleString()}
             </p>
           </header>
 

@@ -9,6 +9,7 @@ function ConfigPage() {
 
   useEffect(() => {
     const controller = new AbortController();
+
     const fetchRecords = async () => {
       setLoading(true);
       setError(null);
@@ -23,7 +24,7 @@ function ConfigPage() {
         );
         const data = await response.json();
         if (!response.ok || !data?.ok) {
-          throw new Error(data?.error || "Failed to load XR records.");
+          throw new Error(data?.error || "Failed to load Reality records.");
         }
         setRecords(Array.isArray(data.data) ? data.data : []);
       } catch (err) {
@@ -57,14 +58,14 @@ function ConfigPage() {
             Reality Configurations
           </h1>
           <p className="text-[var(--text-muted)]">
-            همهٔ این‌باندهای Reality ایجادشده از طریق ویزارد در اینجا لیست‌شده‌اند.
-            با انتخاب هر کدام جزئیات کامل و QR را مشاهده کن.
+            All Reality inbounds created through the wizard appear in this list.
+            Select any entry to review the full configuration details and QR code.
           </p>
         </header>
 
         {loading && (
           <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/80 p-6 text-center text-[var(--text-muted)]">
-            در حال بارگذاری...
+            Loading records...
           </div>
         )}
 
@@ -76,8 +77,8 @@ function ConfigPage() {
 
         {!loading && !error && sortedRecords.length === 0 && (
           <div className="rounded-xl border border-[var(--border-color)] bg-[var(--bg-card)]/80 p-6 text-center text-[var(--text-muted)]">
-            هنوز کانفیگی ثبت نشده است. از صفحهٔ Create برای ایجاد Reality
-            جدید استفاده کن.
+            No configurations have been created yet. Use the Create wizard to
+            provision your first Reality inbound.
           </div>
         )}
 
@@ -102,7 +103,7 @@ function ConfigPage() {
                       {record.tag}
                     </span>
                     <p className="text-xs md:hidden">
-                      ایجاد: {new Date(record.createdAt).toLocaleString()}
+                      Created: {new Date(record.createdAt).toLocaleString()}
                     </p>
                   </div>
                   <div className="truncate">{record.domain}</div>
@@ -116,7 +117,7 @@ function ConfigPage() {
                       onClick={() => setSelected(record)}
                       className="inline-flex items-center justify-center rounded-lg border border-[var(--border-color)] bg-[var(--bg-main)]/40 px-4 py-2 text-xs font-semibold text-[var(--text-main)] hover:border-[var(--accent)] hover:text-[var(--accent)] transition"
                     >
-                      مشاهده
+                      View
                     </button>
                   </div>
                 </div>
