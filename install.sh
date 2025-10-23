@@ -70,7 +70,8 @@ for global_pkg in serve pm2; do
 done
 
 # 8️⃣ Start processes
-sudo pm2 delete all || true
+sudo pm2 delete loopa-panel || true
+sudo pm2 delete loopa-api || true
 sudo pm2 start "npx serve -s dist -l 3000" --name "loopa-panel"
 sudo pm2 start "node server/index.js" --name "loopa-api"
 sudo pm2 save
