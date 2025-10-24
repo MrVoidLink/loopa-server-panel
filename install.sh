@@ -89,9 +89,9 @@ Keep this file safe and delete it after saving the credentials securely.
 EOF
 chmod 600 "$CREDS_FILE"
 
-echo "Admin username: ${ADMIN_USER}"
-echo "Admin password: ${ADMIN_PASS}"
-echo "Credentials saved to ${CREDS_FILE}"
+ADMIN_USER_MESSAGE="Admin username: ${ADMIN_USER}"
+ADMIN_PASS_MESSAGE="Admin password: ${ADMIN_PASS}"
+CRED_FILE_MESSAGE="Credentials saved to ${CREDS_FILE}"
 
 # Step 8 - Ensure serve & pm2 globally installed
 for global_pkg in serve pm2; do
@@ -116,6 +116,10 @@ sudo env \
 sudo pm2 save
 sudo pm2 startup | tail -n 3
 
+HOST_IP=$(hostname -I | awk '{print $1}')
 echo "Installation complete!"
-echo "Panel: http://$(hostname -I | awk '{print $1}'):3000"
-echo "API:   http://$(hostname -I | awk '{print $1}'):4000/api/status"
+echo "Panel: http://${HOST_IP}:3000"
+echo "API:   http://${HOST_IP}:4000/api/status"
+echo "${ADMIN_USER_MESSAGE}"
+echo "${ADMIN_PASS_MESSAGE}"
+echo "${CRED_FILE_MESSAGE}"
