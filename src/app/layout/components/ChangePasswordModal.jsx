@@ -11,8 +11,6 @@ function ChangePasswordModal({ open, onClose, onSuccess }) {
   const [loading, setLoading] = useState(false);
   const [successMessage, setSuccessMessage] = useState(null);
 
-  if (!open) return null;
-
   useEffect(() => {
     if (!open) return;
     setUsername(user?.username ?? "");
@@ -22,6 +20,8 @@ function ChangePasswordModal({ open, onClose, onSuccess }) {
     setError(null);
     setSuccessMessage(null);
   }, [open, user]);
+
+  if (!open) return null;
 
   const handleSubmit = async (event) => {
     event.preventDefault();
