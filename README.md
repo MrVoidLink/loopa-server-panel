@@ -66,16 +66,9 @@ node server/index.js
 
 ## ☁️ One-Line Server Install
 ```bash
-curl -fsSL https://raw.githubusercontent.com/<YOUR_GITHUB_USER>/loopa-server-panel/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/MrVoidLink/loopa-server-panel/main/install.sh | bash
 ```
-1. Replace `<YOUR_GITHUB_USER>` (and optionally `<YOUR_BRANCH>`) with your repository location.  
-2. The script downloads `install.sh`, installs required packages, configures systemd, and launches the panel.  
-3. Prefer to inspect the script before running it in production; alternatively download and invoke it manually:
-   ```bash
-   curl -fsSL https://raw.githubusercontent.com/<YOUR_GITHUB_USER>/loopa-server-panel/main/install.sh -o install.sh
-   bash install.sh
-   ```
-
+The script downloads `install.sh`, installs required packages, configures systemd, and launches the panel.  
 > ⚠️ Always review deployment scripts to ensure they comply with your security policies.
 
 ---
