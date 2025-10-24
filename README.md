@@ -85,6 +85,13 @@ The script downloads `install.sh`, installs required packages, configures system
 
 ---
 
+## Authentication
+- هنگام اجرای `install.sh` یک نام کاربری و رمز عبور تصادفی ساخته می‌شود و در فایل `~/loopa-panel-credentials.txt` ذخیره خواهد شد. از همان مقادیر برای ورود اولیه استفاده کنید.
+- پنل از مسیر `/login` در دسترس است و تمام مسیرهای `/api/*` پشت احراز هویت مبتنی بر JWT محافظت می‌شوند.
+- از منوی کاربری بالای صفحه می‌توانید گزینه‌ی «Change password» را انتخاب کرده و رمز را تغییر دهید؛ پس از تغییر رمز، پنل شما را از حساب خارج می‌کند تا با رمز جدید وارد شوید.
+
+---
+
 ## 🌳 Reality Tree Modal
 - The Config page now includes a **Tree** button per record.
 - On click, the UI requests `/records/:id/structure` and renders the returned JSON tree.

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from "react";
 import QRCode from "react-qr-code";
+import { useAuth } from "../../../app/auth/AuthContext";
 
 const HOST_REGEX =
   /^[a-z0-9]([a-z0-9-]*[a-z0-9])?(\.[a-z0-9]([a-z0-9-]*[a-z0-9])?)+$/;
@@ -39,6 +40,7 @@ const sanitizeTag = (value, port) => {
 const isAscii = (value) => /^[\x00-\x7F]*$/.test(value ?? "");
 
 function XRARRealityWizard() {
+  const { authFetch } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const [step, setStep] = useState(1);
   const [form, setForm] = useState(INITIAL_FORM);
@@ -137,9 +139,7 @@ function XRARRealityWizard() {
     setErrorMessage(null);
 
     try {
-      const host =
-        typeof window !== "undefined" ? window.location.hostname : "localhost";
-      const response = await fetch(`http://${host}:4000/api/xrar/reality`, {
+      const response = await authFetch("/api/xrar/reality", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(sanitized),

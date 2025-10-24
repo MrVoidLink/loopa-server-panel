@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ConfigDetailModal from "../components/ConfigDetailModal";
 import ConfigTreeModal from "../components/ConfigTreeModal";
+import { useAuth } from "../../../app/auth/AuthContext";
 
 function ConfigPage() {
   const [records, setRecords] = useState([]);
@@ -15,6 +16,7 @@ function ConfigPage() {
   const [deletingId, setDeletingId] = useState(null);
   const [structureLoadingId, setStructureLoadingId] = useState(null);
   const [structureError, setStructureError] = useState(null);
+  const { authFetch } = useAuth();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -23,14 +25,9 @@ function ConfigPage() {
       setLoading(true);
       setError(null);
       try {
-        const host =
-          typeof window !== "undefined"
-            ? window.location.hostname
-            : "localhost";
-        const response = await fetch(
-          `http://${host}:4000/api/xrar/records`,
-          { signal: controller.signal }
-        );
+        const response = await authFetch("/api/xrar/records", {
+          signal: controller.signal,
+        });
         const data = await response.json();
         if (!response.ok || !data?.ok) {
           throw new Error(data?.error || "Failed to load Reality records.");
@@ -48,7 +45,7 @@ function ConfigPage() {
     fetchRecords();
 
     return () => controller.abort();
-  }, []);
+  }, [authFetch]);
 
   const sortedRecords = useMemo(
     () =>
@@ -70,12 +67,9 @@ function ConfigPage() {
       setActionError(null);
       setStatusMessage(null);
 
-      const host =
-        typeof window !== "undefined" ? window.location.hostname : "localhost";
-      const response = await fetch(
-        `http://${host}:4000/api/xrar/records/${record.id}`,
-        { method: "DELETE" }
-      );
+      const response = await authFetch(`/api/xrar/records/${record.id}`, {
+        method: "DELETE",
+      });
       const data = await response.json();
       if (!response.ok || !data?.ok) {
         throw new Error(data?.error || "Failed to delete configuration.");
@@ -95,10 +89,8 @@ function ConfigPage() {
     try {
       setStructureLoadingId(record.id);
       setStructureError(null);
-      const host =
-        typeof window !== "undefined" ? window.location.hostname : "localhost";
-      const response = await fetch(
-        `http://${host}:4000/api/xrar/records/${record.id}/structure`
+      const response = await authFetch(
+        `/api/xrar/records/${record.id}/structure`
       );
       const data = await response.json();
       if (!response.ok || !data?.ok) {

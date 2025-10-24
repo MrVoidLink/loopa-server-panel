@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import StatsCard from "../components/StatsCard";
+import { useAuth } from "../../../app/auth/AuthContext";
 import {
   Cpu,
   Globe,
@@ -32,6 +33,7 @@ function DashboardPage() {
   const [status, setStatus] = useState(INITIAL_STATUS);
   const [lastUpdated, setLastUpdated] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
+  const { authFetch } = useAuth();
 
   useEffect(() => {
     let isMounted = true;
@@ -39,10 +41,9 @@ function DashboardPage() {
     const fetchStatus = async () => {
       try {
         setRefreshing(true);
-        const host = window.location.hostname || "localhost";
-        const response = await fetch(`http://${host}:4000/api/status`);
+        const response = await authFetch("/api/status");
         const data = await response.json();
-        if (isMounted && data.ok) {
+        if (isMounted && response.ok && data?.ok) {
           setStatus(data);
           setLastUpdated(new Date());
         }
@@ -62,7 +63,7 @@ function DashboardPage() {
       isMounted = false;
       clearInterval(interval);
     };
-  }, []);
+  }, [authFetch]);
 
   const loading = !lastUpdated;
   const serverOnline = status.ip !== "Loading...";
