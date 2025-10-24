@@ -1,14 +1,19 @@
 import React, { useEffect, useMemo, useState } from "react";
 import ConfigDetailModal from "../components/ConfigDetailModal";
+import ConfigTreeModal from "../components/ConfigTreeModal";
 
 function ConfigPage() {
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selected, setSelected] = useState(null);
+  const [structureRecord, setStructureRecord] = useState(null);
+  const [structureTree, setStructureTree] = useState(null);
   const [statusMessage, setStatusMessage] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
+  const [structureLoadingId, setStructureLoadingId] = useState(null);
+  const [structureError, setStructureError] = useState(null);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -85,6 +90,39 @@ function ConfigPage() {
     }
   };
 
+  const handleStructure = async (record) => {
+    try {
+      setStructureLoadingId(record.id);
+      setStructureError(null);
+      const host =
+        typeof window !== "undefined" ? window.location.hostname : "localhost";
+      const response = await fetch(
+        `http://${host}:4000/api/xrar/records/${record.id}/structure`
+      );
+      const data = await response.json();
+      if (!response.ok || !data?.ok) {
+        throw new Error(
+          data?.error || "Failed to load configuration structure."
+        );
+      }
+      setStructureRecord(record);
+      setStructureTree(data.data?.tree ?? null);
+    } catch (err) {
+      setStructureTree(null);
+      setStructureRecord(null);
+      setStructureError(
+        err.message || "Unexpected error while loading structure."
+      );
+    } finally {
+      setStructureLoadingId(null);
+    }
+  };
+
+  const closeStructureModal = () => {
+    setStructureRecord(null);
+    setStructureTree(null);
+  };
+
   return (
     <div className="relative h-full">
       <div className="space-y-6">
@@ -107,6 +145,12 @@ function ConfigPage() {
         {actionError && (
           <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-400">
             {actionError}
+          </div>
+        )}
+
+        {structureError && (
+          <div className="rounded-xl border border-red-500/40 bg-red-500/10 p-4 text-sm text-red-400">
+            {structureError}
           </div>
         )}
 
@@ -201,6 +245,16 @@ function ConfigPage() {
                         </button>
                         <button
                           type="button"
+                          onClick={() => handleStructure(record)}
+                          disabled={structureLoadingId === record.id}
+                          className="inline-flex items-center justify-center rounded-xl border border-[var(--accent)]/30 bg-[var(--bg-main)]/50 px-4 py-2 text-xs font-semibold text-[var(--accent)] hover:border-[var(--accent)] hover:bg-[var(--accent)]/10 transition disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {structureLoadingId === record.id
+                            ? "Loading..."
+                            : "Tree"}
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => handleDelete(record)}
                           disabled={deletingId === record.id}
                           className="inline-flex items-center justify-center rounded-xl border border-red-500/30 bg-red-500/10 px-4 py-2 text-xs font-semibold text-red-400 hover:border-red-500/60 hover:bg-red-500/20 transition disabled:cursor-not-allowed disabled:opacity-60"
@@ -219,6 +273,14 @@ function ConfigPage() {
 
       {selected && (
         <ConfigDetailModal record={selected} onClose={() => setSelected(null)} />
+      )}
+
+      {structureRecord && structureTree && (
+        <ConfigTreeModal
+          record={structureRecord}
+          tree={structureTree}
+          onClose={closeStructureModal}
+        />
       )}
     </div>
   );
