@@ -1,16 +1,118 @@
-# React + Vite
+<div align="center">
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+# Loopa Server Panel
 
-Currently, two official plugins are available:
+پنل تحت وب برای مدیریت و پایش سرویس Xray/Reality روی سرورهای لینوکسی
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+</div>
 
-## React Compiler
+---
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ امکانات کلیدی
+- داشبورد React/Tailwind با تم تیره و انیمیشن‌های Framer Motion
+- ساخت اینباند Reality از طریق ویزارد و ذخیره‌ی لاگ و خلاصه‌ی امن
+- حذف ایمن اینباند به همراه پاک‌سازی فایل‌های کلیدی و ریستارت سرویس
+- نمایش ساختار درختی کانفیگ هر اینباند (Record + Inbound) داخل مودال اختصاصی
+- API اکسپرس با مسیرهای `status`, `deploy`, `xrar` و اسکریپت نصب خودکار
 
-## Expanding the ESLint configuration
+---
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## 🧱 معماری
+- **Frontend**:  
+  React 19 + Vite 7، Tailwind 4، React Router 7، Lucide Icons و QRCode.
+- **Backend**:  
+  Express 5، ماژول‌های مجزا برای کار با کانفیگ Xray، تولید کلید، مدیریت رکوردها و ریستارت سرویس.
+- **Legacy Assets**:  
+  اسکریپت `install.sh` جهت نصب وابستگی‌ها، فعال‌سازی systemd و راه‌اندازی پنل روی سرور هدف.
+
+ساختار پوشه‌ها:
+```
+src/             ← کد فرانت‌اند
+  app/           ← لایه‌های Layout، Context و Hooks
+  features/      ← ماژول‌های صفحه (Login, Dashboard, Config, Create,…)
+server/          ← API اکسپرس و سرویس‌های مرتبط با Xray
+public/          ← دارایی‌های استاتیک
+install.sh       ← اسکریپت استقرار تک‌خطی روی سرور
+```
+
+---
+
+## ✅ پیش‌نیازها
+- Node.js 20 یا جدیدتر
+- npm 10 یا جدیدتر
+- دسترسی sudo روی سرور لینوکسی (برای نصب وابستگی‌ها، systemctl و مدیریت فایل‌های `/usr/local/etc/xray`)
+- فعال بودن دستورات `curl`, `jq`, `openssl`, `qrencode` (در صورت نبود، اسکریپت نصب اضافه می‌کند)
+
+---
+
+## 🚀 شروع سریع در محیط توسعه
+```bash
+# نصب پکیج‌ها (ریشه پروژه)
+npm install
+
+# اجرای فرانت‌اند (Vite dev server - پورت 5173)
+npm run dev
+
+# اجرای API اکسپرس (پورت 4000)
+node server/index.js
+```
+
+### اسکریپت‌های مفید
+- `npm run build` → تولید خروجی Production در پوشه `dist/`
+- `npm run preview` → تست خروجی Production با سرور داخلی Vite
+- `npm run lint` → اجرای ESLint روی کل پروژه
+
+---
+
+## ☁️ استقرار روی سرور (One-Liner)
+```bash
+curl -fsSL https://raw.githubusercontent.com/<YOUR_GITHUB_USER>/loopa-server-panel/main/install.sh | bash
+```
+1. مقدار `<YOUR_GITHUB_USER>` و در صورت نیاز `<YOUR_BRANCH>` را با مسیر واقعی ریپو جایگزین کنید.  
+2. این دستور اسکریپت `install.sh` را دانلود و اجرا می‌کند؛ سپس وابستگی‌ها را نصب، سرویس systemd را ایجاد و پنل را بالا می‌آورد.  
+3. در صورت اجرای دستی، می‌توانید اسکریپت را دانلود کرده و با `bash install.sh` اجرا کنید.
+
+> ⚠️ قبل از اجرا روی سرور Production، محتوای اسکریپت را بازبینی کنید تا مطابق سیاست امنیتی شما باشد.
+
+---
+
+## 🧭 API‌ های اصلی
+| متد | مسیر | توضیح |
+| --- | --- | --- |
+| `GET` | `/api/status` | وضعیت کلی سرویس و اطلاعات محیط |
+| `POST` | `/api/deploy` | دیپلوی یا بروزرسانی سرویس (استفاده از اسکریپت‌های نصب) |
+| `POST` | `/api/xrar/reality` | ایجاد اینباند Reality جدید (ساخت کلید، ثبت رکورد، ریستارت Xray) |
+| `GET` | `/api/xrar/records` | فهرست تمام اینباندها با جزئیات |
+| `GET` | `/api/xrar/records/:id/structure` | ساختار درختی Record + Inbound (برای مودال Tree) |
+| `DELETE` | `/api/xrar/records/:id` | حذف اینباند و پاک‌سازی فایل‌ها + ریستارت Xray |
+
+---
+
+## 🌳 مودال ساختار درختی (Tree View)
+- در صفحه Config با دکمه‌ی **Tree** برای هر رکورد، درخواست `/records/:id/structure` فراخوانی شده و ساختار JSON به صورت درختی نمایش داده می‌شود.
+- درخت شامل دو لایه است:
+  1. **Record**: جزئیات ثبت‌شده در `reality-records.json`
+  2. **Inbound**: آبجکت واقعی ذخیره شده داخل `config.json`
+- ساختار درختی به شما دیدکامل از کانفیگ نهایی روی Xray می‌دهد و برای عیب‌یابی، مستندسازی و به اشتراک‌گذاری بسیار کاربردی است.
+
+---
+
+## 🔧 توسعه بیشتر (Ideas)
+- افزودن احراز هویت (JWT / OAuth) برای پنل مدیریت
+- ذخیره‌ی متریک‌ها و لاگ‌ها در دیتابیس جداگانه (PostgreSQL یا Redis)
+- پشتیبانی از چندین سرور Xray و مدیریت متمرکز
+- i18n / ترجمه انگلیسی و تم‌های متنوع برای UI
+
+---
+
+## 🤝 مشارکت
+Pull Request و Issue‌ها با آغوش باز پذیرفته می‌شوند. قبل از ارسال، لطفاً استانداردهای lint و فرمت را رعایت کنید.
+
+---
+
+## 🛡️ مجوز
+در صورت نیاز، مجوز دلخواه (MIT, Apache-2.0 و ...) را در این بخش قید کنید. در حال حاضر پروژه تحت حقوق صاحب مخزن است.
+
+---
+
+ساخته شده با ❤️ برای مدیریت آسان Xray Reality.
