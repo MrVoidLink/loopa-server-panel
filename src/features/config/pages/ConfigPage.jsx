@@ -9,6 +9,7 @@ function ConfigPage() {
   const [selected, setSelected] = useState(null);
   const [structureRecord, setStructureRecord] = useState(null);
   const [structureTree, setStructureTree] = useState(null);
+  const [structureFileTrees, setStructureFileTrees] = useState([]);
   const [statusMessage, setStatusMessage] = useState(null);
   const [actionError, setActionError] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
@@ -107,9 +108,11 @@ function ConfigPage() {
       }
       setStructureRecord(record);
       setStructureTree(data.data?.tree ?? null);
+      setStructureFileTrees(Array.isArray(data.data?.files) ? data.data.files : []);
     } catch (err) {
       setStructureTree(null);
       setStructureRecord(null);
+      setStructureFileTrees([]);
       setStructureError(
         err.message || "Unexpected error while loading structure."
       );
@@ -121,6 +124,7 @@ function ConfigPage() {
   const closeStructureModal = () => {
     setStructureRecord(null);
     setStructureTree(null);
+    setStructureFileTrees([]);
   };
 
   return (
@@ -275,13 +279,15 @@ function ConfigPage() {
         <ConfigDetailModal record={selected} onClose={() => setSelected(null)} />
       )}
 
-      {structureRecord && structureTree && (
+      {structureRecord &&
+        (structureTree || structureFileTrees.length > 0) && (
         <ConfigTreeModal
-          record={structureRecord}
-          tree={structureTree}
-          onClose={closeStructureModal}
-        />
-      )}
+            record={structureRecord}
+            tree={structureTree}
+            fileTrees={structureFileTrees}
+            onClose={closeStructureModal}
+          />
+        )}
     </div>
   );
 }

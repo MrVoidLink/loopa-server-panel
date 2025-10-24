@@ -18,6 +18,7 @@ import {
   restartXrayService,
   findInboundForRecord,
   buildRecordStructureTree,
+  buildRecordFileTrees,
 } from "../services/xrarService.js";
 
 const router = express.Router();
@@ -290,10 +291,11 @@ router.get("/records/:id/structure", async (req, res) => {
     }
 
     const tree = buildRecordStructureTree(record, inbound);
+    const fileTrees = await buildRecordFileTrees(record);
 
     return res.json({
       ok: true,
-      data: { tree },
+      data: { tree, files: fileTrees },
     });
   } catch (error) {
     return res.status(500).json({

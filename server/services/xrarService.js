@@ -297,3 +297,91 @@ export const buildRecordStructureTree = (record, inbound) => {
     children: sections,
   };
 };
+
+const buildDirectoryTree = async (
+  targetPath,
+  { maxDepth = 3, currentDepth = 0 } = {}
+) => {
+  const isRoot = currentDepth === 0;
+  const label = isRoot ? targetPath : path.basename(targetPath) || targetPath;
+  const node = {
+    label,
+    type: "directory",
+    path: targetPath,
+    children: [],
+  };
+
+  if (currentDepth >= maxDepth) {
+    node.children.push({
+      label: "...",
+      type: "ellipsis",
+      value: `Depth limit (${maxDepth}) reached`,
+    });
+    return node;
+  }
+
+  let entries;
+  try {
+    entries = await fs.readdir(targetPath, { withFileTypes: true });
+  } catch (error) {
+    node.children.push({
+      label: "Error",
+      type: "error",
+      value: error.message,
+    });
+    return node;
+  }
+
+  const sorted = entries.sort((a, b) => {
+    if (a.isDirectory() && !b.isDirectory()) return -1;
+    if (!a.isDirectory() && b.isDirectory()) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  for (const entry of sorted) {
+    const entryPath = path.join(targetPath, entry.name);
+    if (entry.isDirectory()) {
+      node.children.push(
+        await buildDirectoryTree(entryPath, {
+          maxDepth,
+          currentDepth: currentDepth + 1,
+        })
+      );
+    } else {
+      node.children.push({
+        label: entry.name,
+        type: "file",
+        path: entryPath,
+      });
+    }
+  }
+
+  return node;
+};
+
+export const buildRecordFileTrees = async (record) => {
+  if (!record) {
+    return [];
+  }
+
+  const candidateFiles = [
+    record.configPath ?? CONFIG_PATH,
+    record.privateKeyPath,
+    record.summaryFile,
+    RECORDS_PATH,
+  ].filter(Boolean);
+
+  const directories = new Map();
+
+  for (const filePath of candidateFiles) {
+    const dirPath = path.dirname(filePath);
+    if (!directories.has(dirPath)) {
+      directories.set(
+        dirPath,
+        await buildDirectoryTree(dirPath, { maxDepth: 3 })
+      );
+    }
+  }
+
+  return Array.from(directories.values());
+};
